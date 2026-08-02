@@ -3,13 +3,40 @@
  * 
  * Cara pakai:
  *   node setup-db.js <SUPABASE_URL> <SERVICE_ROLE_KEY>
- * 
- * Contoh:
- *   node setup-db.js https://xxxxx.supabase.co eyJhbGciOiJIUzI1NiIs...
+ *   atau cukup buat file .env lalu jalankan:
+ *   node setup-db.js
  */
 
-const SUPABASE_URL = process.argv[2];
-const SERVICE_KEY = process.argv[3];
+const fs = require('fs');
+const path = require('path');
+
+let SUPABASE_URL = process.argv[2];
+let SERVICE_KEY = process.argv[3];
+
+// Jika argumen tidak ada, coba baca dari file .env
+if (!SUPABASE_URL || !SERVICE_KEY) {
+    try {
+        const envPath = path.join(__dirname, '.env');
+        if (fs.existsSync(envPath)) {
+            const envContent = fs.readFileSync(envPath, 'utf-8');
+            const envLines = envContent.split('\n');
+            const env = {};
+            for (const line of envLines) {
+                const parts = line.split('=');
+                if (parts.length >= 2) {
+                    const key = parts[0].trim();
+                    const val = parts.slice(1).join('=').trim();
+                    env[key] = val;
+                }
+            }
+            SUPABASE_URL = SUPABASE_URL || env.SUPABASE_URL;
+            // Gunakan SERVICE_ROLE_KEY dari env jika ada, fallback ke SUPABASE_ANON_KEY jika tidak ada
+            SERVICE_KEY = SERVICE_KEY || env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_ANON_KEY;
+        }
+    } catch (err) {
+        console.warn('Gagal membaca file .env:', err.message);
+    }
+}
 
 if (!SUPABASE_URL || !SERVICE_KEY) {
     console.log('');
@@ -17,9 +44,7 @@ if (!SUPABASE_URL || !SERVICE_KEY) {
     console.log('');
     console.log('Cara pakai:');
     console.log('  node setup-db.js <SUPABASE_URL> <SERVICE_ROLE_KEY>');
-    console.log('');
-    console.log('Contoh:');
-    console.log('  node setup-db.js https://abcdef.supabase.co eyJhbGciOiJIUzI1NiIs...');
+    console.log('  atau isi file .env di folder ini dan jalankan: node setup-db.js');
     console.log('');
     console.log('Service Role Key bisa ditemukan di:');
     console.log('  Supabase Dashboard > Settings > API > service_role (klik Reveal)');

@@ -4,11 +4,29 @@
 
 let db = null; // Supabase client instance
 
+let globalConfig = { url: '', key: '' };
+
 // ===== INITIALIZATION =====
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    await fetchConfig();
     detectPage();
 });
+
+async function fetchConfig() {
+    try {
+        const response = await fetch('/api/config');
+        if (response.ok) {
+            const data = await response.json();
+            if (data.supabaseUrl && data.supabaseKey) {
+                globalConfig.url = data.supabaseUrl;
+                globalConfig.key = data.supabaseKey;
+            }
+        }
+    } catch (err) {
+        console.warn('Gagal memuat konfigurasi dari API, menggunakan fallback lokal:', err);
+    }
+}
 
 function detectPage() {
     const path = window.location.pathname;
@@ -24,16 +42,6 @@ function detectPage() {
 // ===== LOGIN PAGE INIT =====
 
 function initLoginPage() {
-    const settings = getSettings();
-    if (settings.url) {
-        const urlInput = document.getElementById('input-supabase-url');
-        if (urlInput) urlInput.value = settings.url;
-    }
-    if (settings.key) {
-        const keyInput = document.getElementById('input-supabase-key');
-        if (keyInput) keyInput.value = settings.key;
-    }
-
     // Check if already logged in
     if (sessionStorage.getItem('bh_logged_in') === 'true') {
         window.location.href = 'dashboard.html';
@@ -86,13 +94,7 @@ function initDashboardPage() {
 
     // Load saved settings into settings form
     const settings = getSettings();
-    const urlInput = document.getElementById('input-supabase-url');
-    const keyInput = document.getElementById('input-supabase-key');
-    const serviceKeyInput = document.getElementById('input-service-key');
     const passInput = document.getElementById('input-app-password');
-    if (urlInput && settings.url) urlInput.value = settings.url;
-    if (keyInput && settings.key) keyInput.value = settings.key;
-    if (serviceKeyInput && settings.serviceKey) serviceKeyInput.value = settings.serviceKey;
     if (passInput && settings.password) passInput.value = settings.password;
 
     // Init Supabase
@@ -149,35 +151,31 @@ function createParticles() {
 // ===== SETTINGS MANAGEMENT =====
 
 function getSettings() {
+    // Prioritaskan konfigurasi yang dimuat dari serverless endpoint /api/config
     return {
-        url: localStorage.getItem('bh_supabase_url') || '',
-        key: localStorage.getItem('bh_supabase_key') || '',
+        url: globalConfig.url || localStorage.getItem('bh_supabase_url') || '',
+        key: globalConfig.key || localStorage.getItem('bh_supabase_key') || '',
         serviceKey: localStorage.getItem('bh_service_key') || '',
         password: localStorage.getItem('bh_app_password') || ''
     };
 }
 
 function saveSettings(url, key, serviceKey, password) {
-    localStorage.setItem('bh_supabase_url', url);
-    localStorage.setItem('bh_supabase_key', key);
+    // Hanya simpan ke localStorage jika config global tidak aktif
+    if (!globalConfig.url) {
+        if (url) localStorage.setItem('bh_supabase_url', url);
+        if (key) localStorage.setItem('bh_supabase_key', key);
+    }
     if (serviceKey) localStorage.setItem('bh_service_key', serviceKey);
     if (password) localStorage.setItem('bh_app_password', password);
 }
 
 function handleSaveSettings(e) {
     e.preventDefault();
-    const url = document.getElementById('input-supabase-url').value.trim();
-    const key = document.getElementById('input-supabase-key').value.trim();
-    const serviceKey = document.getElementById('input-service-key').value.trim();
     const password = document.getElementById('input-app-password').value.trim();
 
-    if (!url || !key) {
-        showStatus('settings-status', 'URL dan Anon Key wajib diisi.', 'error');
-        return;
-    }
-
-    saveSettings(url, key, serviceKey, password);
-    initSupabase();
+    // Hanya ubah kata sandi aplikasi
+    saveSettings('', '', '', password);
     showStatus('settings-status', 'Pengaturan berhasil disimpan!', 'success');
 }
 
