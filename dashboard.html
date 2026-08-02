@@ -27,7 +27,7 @@
             </button>
             <button id="btn-nav-pengaturan" class="sidebar-link" onclick="showSection('pengaturan')">
                 <span class="sidebar-icon">⚙️</span>
-                <span class="sidebar-label">Pengaturan</span>
+                <span class="sidebar-label">Status Sistem</span>
             </button>
         </nav>
 
@@ -129,23 +129,10 @@
         <!-- ===== SECTION: PENGATURAN ===== -->
         <section id="section-pengaturan" class="section">
             <div class="section-header">
-                <h2>⚙️ Pengaturan</h2>
-                <p class="section-desc">Kelola keamanan dan status sistem Anda.</p>
+                <h2>⚙️ Status Sistem</h2>
+                <p class="section-desc">Informasi dan koneksi sistem database Anda.</p>
             </div>
             <div class="settings-card">
-                <p class="info-text">Kelola kata sandi untuk mengunci akses ke buku harian Anda di perangkat ini.</p>
-                <form id="form-settings" onsubmit="return false;">
-                    <div class="form-group">
-                        <label for="input-app-password">🔒 Kata Sandi Aplikasi</label>
-                        <input type="password" id="input-app-password" placeholder="Kata sandi baru...">
-                        <small>Digunakan untuk mengunci akses halaman masuk Buku Harian Anda.</small>
-                    </div>
-                    <button type="submit" id="btn-save-settings" class="btn-primary">💾 Simpan Kata Sandi</button>
-                    <p id="settings-status" class="status-text" style="display:none;"></p>
-                </form>
-            </div>
-
-            <div class="settings-card" style="margin-top: 24px;">
                 <h3>🗄️ Status Database</h3>
                 <p class="info-text">Periksa apakah database Supabase Anda sudah terhubung dengan benar dan tabel siap digunakan.</p>
                 <button id="btn-check-db" class="btn-secondary" onclick="checkDatabase()">🔍 Cek Status Tabel</button>

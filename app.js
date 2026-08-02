@@ -92,11 +92,6 @@ function initDashboardPage() {
         dateInput.value = new Date().toISOString().split('T')[0];
     }
 
-    // Load saved settings into settings form
-    const settings = getSettings();
-    const passInput = document.getElementById('input-app-password');
-    if (passInput && settings.password) passInput.value = settings.password;
-
     // Init Supabase
     if (initSupabase()) {
         loadAllEntries();
@@ -111,12 +106,6 @@ function setupDashboardListeners() {
     if (formCatatan) formCatatan.addEventListener('submit', handleSaveEntry);
     const btnSimpan = document.getElementById('btn-simpan');
     if (btnSimpan) btnSimpan.addEventListener('click', handleSaveEntry);
-
-    // Settings form
-    const formSettings = document.getElementById('form-settings');
-    if (formSettings) formSettings.addEventListener('submit', handleSaveSettings);
-    const btnSaveSettings = document.getElementById('btn-save-settings');
-    if (btnSaveSettings) btnSaveSettings.addEventListener('click', handleSaveSettings);
 
     // Edit form
     const formEdit = document.getElementById('form-edit');
@@ -151,29 +140,11 @@ function createParticles() {
 // ===== SETTINGS MANAGEMENT =====
 
 function getSettings() {
-    // Hanya membaca kredensial Supabase dari API Config (Vercel/env), tidak menyimpan ke LocalStorage
+    // Hanya membaca kredensial Supabase dari API Config (Vercel/env)
     return {
         url: globalConfig.url || '',
-        key: globalConfig.key || '',
-        password: localStorage.getItem('bh_app_password') || ''
+        key: globalConfig.key || ''
     };
-}
-
-function saveSettings(password) {
-    // Hanya menyimpan password aplikasi untuk keamanan lokal
-    if (password) {
-        localStorage.setItem('bh_app_password', password);
-    } else {
-        localStorage.removeItem('bh_app_password');
-    }
-}
-
-function handleSaveSettings(e) {
-    e.preventDefault();
-    const password = document.getElementById('input-app-password').value.trim();
-
-    saveSettings(password);
-    showStatus('settings-status', 'Pengaturan berhasil disimpan!', 'success');
 }
 
 // ===== SUPABASE CLIENT =====
@@ -197,16 +168,9 @@ function initSupabase() {
 function handleLogin(e) {
     e.preventDefault();
     const password = document.getElementById('input-password').value;
-    const savedPassword = getSettings().password;
+    const correctPassword = "konfirmasi17"; // Password permanen, selalu ini dan tidak bisa diubah
 
-    // If no password set, let them in and go to settings
-    if (!savedPassword) {
-        sessionStorage.setItem('bh_logged_in', 'true');
-        window.location.href = 'dashboard.html';
-        return;
-    }
-
-    if (password === savedPassword) {
+    if (password === correctPassword) {
         const errorEl = document.getElementById('login-error');
         if (errorEl) errorEl.style.display = 'none';
         sessionStorage.setItem('bh_logged_in', 'true');
