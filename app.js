@@ -151,31 +151,28 @@ function createParticles() {
 // ===== SETTINGS MANAGEMENT =====
 
 function getSettings() {
-    // Prioritaskan konfigurasi yang dimuat dari serverless endpoint /api/config
+    // Hanya membaca kredensial Supabase dari API Config (Vercel/env), tidak menyimpan ke LocalStorage
     return {
-        url: globalConfig.url || localStorage.getItem('bh_supabase_url') || '',
-        key: globalConfig.key || localStorage.getItem('bh_supabase_key') || '',
-        serviceKey: localStorage.getItem('bh_service_key') || '',
+        url: globalConfig.url || '',
+        key: globalConfig.key || '',
         password: localStorage.getItem('bh_app_password') || ''
     };
 }
 
-function saveSettings(url, key, serviceKey, password) {
-    // Hanya simpan ke localStorage jika config global tidak aktif
-    if (!globalConfig.url) {
-        if (url) localStorage.setItem('bh_supabase_url', url);
-        if (key) localStorage.setItem('bh_supabase_key', key);
+function saveSettings(password) {
+    // Hanya menyimpan password aplikasi untuk keamanan lokal
+    if (password) {
+        localStorage.setItem('bh_app_password', password);
+    } else {
+        localStorage.removeItem('bh_app_password');
     }
-    if (serviceKey) localStorage.setItem('bh_service_key', serviceKey);
-    if (password) localStorage.setItem('bh_app_password', password);
 }
 
 function handleSaveSettings(e) {
     e.preventDefault();
     const password = document.getElementById('input-app-password').value.trim();
 
-    // Hanya ubah kata sandi aplikasi
-    saveSettings('', '', '', password);
+    saveSettings(password);
     showStatus('settings-status', 'Pengaturan berhasil disimpan!', 'success');
 }
 
