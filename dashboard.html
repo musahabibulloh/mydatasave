@@ -129,78 +129,27 @@
         <!-- ===== SECTION: PENGATURAN ===== -->
         <section id="section-pengaturan" class="section">
             <div class="section-header">
-                <h2>⚙️ Pengaturan Supabase</h2>
-                <p class="section-desc">Konfigurasi koneksi database Anda.</p>
+                <h2>⚙️ Pengaturan</h2>
+                <p class="section-desc">Kelola keamanan dan status sistem Anda.</p>
             </div>
             <div class="settings-card">
-                <p class="info-text">Masukkan konfigurasi Supabase Anda di bawah ini. Data akan disimpan di browser lokal Anda.</p>
+                <p class="info-text">Kelola kata sandi untuk mengunci akses ke buku harian Anda di perangkat ini.</p>
                 <form id="form-settings" onsubmit="return false;">
                     <div class="form-group">
-                        <label for="input-supabase-url">🔗 Supabase URL</label>
-                        <input type="url" id="input-supabase-url" placeholder="https://xxxxx.supabase.co">
-                    </div>
-                    <div class="form-group">
-                        <label for="input-supabase-key">🔐 Supabase Anon Key</label>
-                        <input type="text" id="input-supabase-key" placeholder="eyJhbGciOiJIUzI1NiIs...">
-                    </div>
-                    <div class="form-group">
-                        <label for="input-service-key">🛡️ Service Role Key</label>
-                        <input type="password" id="input-service-key" placeholder="eyJhbGciOiJIUzI1NiIs...">
-                        <small>Diperlukan untuk membuat tabel otomatis. Temukan di Supabase → Settings → API → service_role key.</small>
-                    </div>
-                    <div class="form-group">
                         <label for="input-app-password">🔒 Kata Sandi Aplikasi</label>
-                        <input type="password" id="input-app-password" placeholder="Kata sandi untuk login">
-                        <small>Ini adalah kata sandi sederhana untuk mengunci akses ke buku harian Anda.</small>
+                        <input type="password" id="input-app-password" placeholder="Kata sandi baru...">
+                        <small>Digunakan untuk mengunci akses halaman masuk Buku Harian Anda.</small>
                     </div>
-                    <button type="submit" id="btn-save-settings" class="btn-primary">💾 Simpan Pengaturan</button>
+                    <button type="submit" id="btn-save-settings" class="btn-primary">💾 Simpan Kata Sandi</button>
                     <p id="settings-status" class="status-text" style="display:none;"></p>
                 </form>
             </div>
 
             <div class="settings-card" style="margin-top: 24px;">
-                <h3>🗄️ Inisialisasi Database</h3>
-                <p class="info-text">Klik tombol di bawah untuk membuat tabel yang diperlukan di Supabase. Jalankan ini sekali saja saat pertama kali.</p>
-                <button id="btn-init-db" class="btn-secondary" onclick="initDatabase()">🔧 Buat Tabel</button>
+                <h3>🗄️ Status Database</h3>
+                <p class="info-text">Periksa apakah database Supabase Anda sudah terhubung dengan benar dan tabel siap digunakan.</p>
+                <button id="btn-check-db" class="btn-secondary" onclick="checkDatabase()">🔍 Cek Status Tabel</button>
                 <p id="init-status" class="status-text" style="display:none;"></p>
-                <div class="sql-hint">
-                    <h4>📋 SQL Manual (jika tombol di atas gagal):</h4>
-                    <pre><code>-- Jalankan di Supabase SQL Editor
-
-CREATE TABLE IF NOT EXISTS catatan_harian (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    tanggal DATE NOT NULL,
-    judul TEXT NOT NULL,
-    isi TEXT NOT NULL,
-    suasana TEXT DEFAULT '😊',
-    foto_urls TEXT[] DEFAULT '{}',
-    created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Buat bucket storage
-INSERT INTO storage.buckets (id, name, public)
-VALUES ('foto-harian', 'foto-harian', true)
-ON CONFLICT (id) DO NOTHING;
-
--- Policy untuk upload
-CREATE POLICY "Allow public upload"
-ON storage.objects FOR INSERT
-WITH CHECK (bucket_id = 'foto-harian');
-
--- Policy untuk read
-CREATE POLICY "Allow public read"
-ON storage.objects FOR SELECT
-USING (bucket_id = 'foto-harian');
-
--- Policy untuk delete
-CREATE POLICY "Allow public delete"
-ON storage.objects FOR DELETE
-USING (bucket_id = 'foto-harian');
-
--- RLS
-ALTER TABLE catatan_harian ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Allow all" ON catatan_harian FOR ALL USING (true);</code></pre>
-                </div>
             </div>
         </section>
 
